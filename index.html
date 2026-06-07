@@ -705,9 +705,11 @@ if(contactForm){
       });
       if(!response.ok)throw new Error('Unable to send message');
       contactForm.reset();
+      if(window.trackPortfolioEvent)window.trackPortfolioEvent('contact_form_success',{section:'contact'});
       formStatus.className='form-status success';
       formStatus.textContent='Message sent. I will reply soon.';
     }catch(err){
+      if(window.trackPortfolioEvent)window.trackPortfolioEvent('contact_form_error',{section:'contact'});
       formStatus.className='form-status error';
       formStatus.textContent='Message could not be sent. Please email me directly at vimalsivanandham@gmail.com.';
     }finally{
@@ -717,4 +719,5 @@ if(contactForm){
   });
 }
 </script>
+<script defer src="analytics.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
