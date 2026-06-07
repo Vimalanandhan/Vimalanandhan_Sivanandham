@@ -200,6 +200,10 @@ section:nth-child(even){background:var(--bg2)}
 .contact-form input,.contact-form textarea{background:var(--muted);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;padding:10px 14px;width:100%;outline:none;transition:border-color 0.2s}
 .contact-form input:focus,.contact-form textarea:focus{border-color:var(--green3)}
 .contact-form textarea{height:120px;resize:vertical}
+.form-status{min-height:18px;margin-top:12px;font-size:12px;color:var(--text2);text-align:center}
+.form-status.success{color:var(--green)}
+.form-status.error{color:#ff6b6b}
+.contact-form button[disabled]{opacity:0.65;cursor:not-allowed}
 
 /* FOOTER */
 footer{padding:2rem;border-top:1px solid var(--border);text-align:center}
@@ -641,12 +645,16 @@ footer{padding:2rem;border-top:1px solid var(--border);text-align:center}
           </a>
         </div>
       </div>
-      <div class="contact-form">
-        <div class="form-row"><label>// your name</label><input type="text" placeholder="Jane Smith"></div>
-        <div class="form-row"><label>// your email</label><input type="email" placeholder="jane@company.com"></div>
-        <div class="form-row"><label>// message</label><textarea placeholder="Hi Vimal, we have an opportunity..."></textarea></div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center">$ send_message</button>
-      </div>
+      <form class="contact-form" id="contactForm" action="https://formsubmit.co/ajax/vimalsivanandham@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="New portfolio message from vimalanandhan-sivanandham.vercel.app">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <div class="form-row"><label for="contactName">// your name</label><input id="contactName" name="name" type="text" placeholder="Jane Smith" required></div>
+        <div class="form-row"><label for="contactEmail">// your email</label><input id="contactEmail" name="email" type="email" placeholder="jane@company.com" required></div>
+        <div class="form-row"><label for="contactMessage">// message</label><textarea id="contactMessage" name="message" placeholder="Hi Vimal, we have an opportunity..." required></textarea></div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">$ send_message</button>
+        <p class="form-status" id="formStatus" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </section>
@@ -676,4 +684,37 @@ const obs=new IntersectionObserver(entries=>{
 document.querySelectorAll('.project-card,.skill-group,.timeline-item,.cert-item,.contact-item').forEach(el=>{
   el.style.opacity='0';obs.observe(el);
 });
+
+const contactForm=document.getElementById('contactForm');
+const formStatus=document.getElementById('formStatus');
+if(contactForm){
+  contactForm.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const submitButton=contactForm.querySelector('button[type="submit"]');
+    const originalText=submitButton.textContent;
+    submitButton.disabled=true;
+    submitButton.textContent='$ sending...';
+    formStatus.className='form-status';
+    formStatus.textContent='Sending message...';
+
+    try{
+      const response=await fetch(contactForm.action,{
+        method:'POST',
+        body:new FormData(contactForm),
+        headers:{Accept:'application/json'}
+      });
+      if(!response.ok)throw new Error('Unable to send message');
+      contactForm.reset();
+      formStatus.className='form-status success';
+      formStatus.textContent='Message sent. I will reply soon.';
+    }catch(err){
+      formStatus.className='form-status error';
+      formStatus.textContent='Message could not be sent. Please email me directly at vimalsivanandham@gmail.com.';
+    }finally{
+      submitButton.disabled=false;
+      submitButton.textContent=originalText;
+    }
+  });
+}
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
